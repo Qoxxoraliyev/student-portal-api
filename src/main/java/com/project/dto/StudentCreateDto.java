@@ -1,12 +1,18 @@
 package com.project.dto;
-import com.project.enums.Gender;
+
+import com.project.domain.Role;
 import com.project.enums.Faculty;
+import com.project.enums.Gender;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-public class StudentDto {
+import java.util.HashSet;
+import java.util.Set;
 
-    private Long id;
+public class StudentCreateDto {
+
+    private String login;
+
+    private String password;
 
     private String firstName;
 
@@ -26,18 +32,30 @@ public class StudentDto {
 
     private String studentGroup;
 
-    private LocalDateTime createdAt;
+    private Set<Role> roles=new HashSet<>();
 
-    private LocalDateTime updatedAt;
-
-    private Boolean status;
-
-    public Long getId() {
-        return id;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getFirstName() {
@@ -110,29 +128,5 @@ public class StudentDto {
 
     public void setStudentGroup(String studentGroup) {
         this.studentGroup = studentGroup;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
     }
 }

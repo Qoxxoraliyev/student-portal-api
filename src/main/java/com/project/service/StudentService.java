@@ -1,38 +1,73 @@
 package com.project.service;
 
+import com.project.domain.Role;
 import com.project.domain.Student;
-import com.project.dto.StudentDto;
+import com.project.dto.StudentCreateDto;
+import com.project.dto.StudentResponseDto;
 import com.project.enums.Faculty;
 import com.project.enums.Gender;
 import com.project.mapper.StudentMapper;
+import com.project.repository.RoleRepository;
 import com.project.repository.StudentRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
 
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
-    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper) {
+
+    public StudentService(StudentRepository studentRepository, StudentMapper studentMapper, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.studentRepository = studentRepository;
         this.studentMapper = studentMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
-
-    public StudentDto save(StudentDto dto){
+    public StudentResponseDto save(StudentCreateDto dto){
+        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         Student student=studentMapper.toEntity(dto);
+        Set<Role> roles = dto.getRoles().stream()
+                .map(r -> roleRepository.findById(r.getName())
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + r.getName())))
+                .collect(Collectors.toSet());
+
+        student.setRoles(roles);
         Student saved=studentRepository.save(student);
         return studentMapper.toDto(saved);
     }
 
 
-    public StudentDto findById(Long id){
+
+
+    public boolean existsByLogin(String login){
+        return studentRepository.existsByLogin(login);
+    }
+
+
+
+    public void validateRegister(StudentCreateDto dto){
+        if (existsByLogin(dto.getLogin())){
+            throw new RuntimeException("This login is already taken");
+        }
+        if (dto.getPassword().length()<=4){
+            throw new RuntimeException("Password length must be greater than 4 characters");
+        }
+    }
+
+
+    public StudentResponseDto findById(Long id){
         Student student=studentRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Student not found"));
         return studentMapper.toDto(student);
@@ -40,14 +75,14 @@ public class StudentService {
 
 
 
-    public List<StudentDto> findAll(){
+    public List<StudentResponseDto> findAll(){
         List<Student> student=studentRepository.findAll();
         return studentMapper.toDto(student);
     }
 
 
 
-    public StudentDto update(Long id,StudentDto studentRequest){
+    public StudentResponseDto update(Long id, StudentResponseDto studentRequest){
 
         Student existingStudent=studentRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Student not found"));
@@ -72,7 +107,7 @@ public class StudentService {
 
 
 
-    public StudentDto updatedPartial(Long id, Map<String, Object> updates){
+    public StudentResponseDto updatedPartial(Long id, Map<String, Object> updates){
         Student existingstudent=studentRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Student not found"));
         if (updates.containsKey("firstName")){
@@ -113,7 +148,7 @@ public class StudentService {
 
 
 
-    public StudentDto delete(Long id){
+    public StudentResponseDto delete(Long id){
       Student student=studentRepository.findById(id)
               .orElseThrow(()->new RuntimeException("Student not found"));
       studentRepository.delete(student);

@@ -1,7 +1,8 @@
 package com.project.mapper;
 
 import com.project.domain.Student;
-import com.project.dto.StudentDto;
+import com.project.dto.StudentCreateDto;
+import com.project.dto.StudentResponseDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -10,12 +11,12 @@ import java.util.List;
 @Component
 public class StudentMapper {
 
-    public StudentDto toDto(Student student){
+    public StudentResponseDto toDto(Student student){
         if (student==null){
             return null;
         }
 
-        StudentDto dto=new StudentDto();
+        StudentResponseDto dto=new StudentResponseDto();
         dto.setId(student.getId());
         dto.setFirstName(student.getFirstName());
         dto.setLastName(student.getLastName());
@@ -29,16 +30,18 @@ public class StudentMapper {
         dto.setCreatedAt(student.getCreatedAt());
         dto.setUpdatedAt(student.getUpdatedAt());
         dto.setStatus(student.getStatus());
+        dto.setRoles(student.getRoles());
         return dto;
     }
 
-    public Student toEntity(StudentDto dto){
+    public Student toEntity(StudentCreateDto dto){
         if (dto==null){
             return null;
         }
 
         Student student=new Student();
-        student.setId(dto.getId());
+        student.setLogin(dto.getLogin());
+        student.setPassword(dto.getPassword());
         student.setFirstName(dto.getFirstName());
         student.setLastName(dto.getLastName());
         student.setEmail(dto.getEmail());
@@ -48,15 +51,12 @@ public class StudentMapper {
         student.setAddress(dto.getAddress());
         student.setFaculty(dto.getFaculty());
         student.setStudentGroup(dto.getStudentGroup());
-        student.setCreatedAt(dto.getCreatedAt());
-        student.setUpdatedAt(dto.getUpdatedAt());
-        student.setStatus(dto.getStatus());
         return student;
     }
 
 
-    public List<StudentDto> toDto(List<Student> students){
-        List<StudentDto> dtoList=new ArrayList<>();
+    public List<StudentResponseDto> toDto(List<Student> students){
+        List<StudentResponseDto> dtoList=new ArrayList<>();
         for (Student student:students){
             dtoList.add(toDto(student));
         }

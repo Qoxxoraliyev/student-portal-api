@@ -4,16 +4,35 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import com.project.enums.Gender;
 import com.project.enums.Faculty;
+
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-public class Student {
+public class Student implements Serializable {
+
 
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+
+    @NotNull(message = "Login cannot be null")
+    @Size(min = 4,max = 50,message = "Login must be between 4 and 50 characters")
+    @NotBlank(message = "Login cannot be blank")
+    @Pattern(regexp = "^[a-zA-Z0-9]+$")
+    @Column(length = 50, nullable = false,unique = true)
+    private String login;
+
+
+    @NotNull(message = "Password cannot be null")
+    @Size(min = 20,max = 60)
+    @Column(length = 60,unique = true,nullable = false)
+    private String password;
 
 
     @NotNull(message = "First name cannot be null")
@@ -71,13 +90,54 @@ public class Student {
     private String studentGroup;
 
 
-
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
     private Boolean status;
 
+
+    @PrePersist
+    public void onCreate(){
+        this.createdAt=LocalDateTime.now();
+        this.updatedAt=LocalDateTime.now();
+        if (this.status==null){
+            this.status=true;
+        }
+    }
+
+    @PreUpdate
+    public void onUpdate(){
+        this.updatedAt=LocalDateTime.now();
+    }
+
+
+
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "student_role",
+            joinColumns = {@JoinColumn(name = "student_id",referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "role_name",referencedColumnName = "name")}
+    )
+    private Set<Role> roles=new HashSet<>();
+
+
+    public String getLogin() {
+        return login;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Long getId() {
         return id;
@@ -186,5 +246,13 @@ public class Student {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 }
